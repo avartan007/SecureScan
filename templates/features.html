@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - File Security Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: white;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 102, 0, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1em 2em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2em;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #ff6600;
+        }
+
+        .nav-links a.active {
+            color: #ff6600;
+            border-bottom: 2px solid #ff6600;
+            padding-bottom: 0.5em;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 2em;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ff6600;
+        }
+
+        h2 {
+            font-size: 32px;
+            margin-top: 60px;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #ff6600;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 16px;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 102, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 102, 0, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 102, 0, 0.3);
+            background: rgba(255, 102, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            margin-top: 0;
+        }
+
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        /* Highlight Section */
+        .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 2em;
+            border-radius: 12px;
+            margin: 60px 0;
+            text-align: center;
+        }
+
+        .highlight h2 {
+            color: white;
+            margin-top: 0;
+        }
+
+        .highlight p {
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Lists */
+        ul {
+            margin: 15px 0 15px 30px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        ul li {
+            margin-bottom: 10px;
+        }
+
+        .do {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .dont {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        /* Two Column */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 40px 0;
+            align-items: center;
+        }
+
+        .two-column h3 {
+            margin-top: 0;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            text-align: center;
+            padding: 2em;
+            margin-top: 60px;
+            border-top: 1px solid rgba(255, 102, 0, 0.2);
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* CTA Button */
+        .cta-button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .cta-button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            .two-column {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .nav-links {
+                gap: 1em;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">🛡️ File Scanner</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/scanner">Scanner</a></li>
+                <li><a href="/features" class="active">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>About File Security Scanner</h1>
+
+        <!-- Features Section -->
+        <h2>Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Instant File Analysis</h3>
+                <p>Upload any file and get an instant verdict in seconds. No registration required.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>70+ Antivirus Engines</h3>
+                <p>Powered by VirusTotal's collective intelligence from the world's leading security vendors.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Smart Fallback</h3>
+                <p>Works without an API key using intelligent extension-based risk classification.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>100% Private</h3>
+                <p>Files are never stored on our servers. Deleted immediately after scanning.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Mobile Friendly</h3>
+                <p>Beautiful, responsive interface works perfectly on phones, tablets, and desktops.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Lightning Fast</h3>
+                <p>Optimized for speed. Most results in under 1 second.</p>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <h2>How It Works</h2>
+        <div class="two-column">
+            <div>
+                <h3>The Process</h3>
+                <ol>
+                    <li><strong>Upload File</strong> — Drag & drop or click to select</li>
+                    <li><strong>Compute Hash</strong> — SHA-256 fingerprint created</li>
+                    <li><strong>Check VirusTotal</strong> — Query 70+ antivirus vendors</li>
+                    <li><strong>Get Result</strong> — CLEAN, SUSPICIOUS, or MALICIOUS</li>
+                </ol>
+            </div>
+            <div>
+                <h3>Why This Works</h3>
+                <p>File hashing is deterministic—the same file always produces the same hash. If 5+ antivirus engines
+                    have flagged that hash, it's probably malicious. If none have, it's likely safe.</p>
+                <p>We don't send the file itself to VirusTotal—just the hash. This keeps your files private.</p>
+            </div>
+        </div>
+
+        <!-- Security & Privacy -->
+        <div class="highlight">
+            <h2>Security & Privacy</h2>
+            <p>Your data is important. Here's what we do and don't do.</p>
+        </div>
+
+        <div class="two-column">
+            <div>
+                <h3 class="do">✓ What We Do</h3>
+                <ul>
+                    <li>Hash files with SHA-256</li>
+                    <li>Check hashes against VirusTotal</li>
+                    <li>Detect suspicious extensions</li>
+                    <li>Keep local scan history</li>
+                    <li>Delete files immediately</li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="dont">✗ What We Don't Do</h3>
+                <ul>
+                    <li>Store files on servers</li>
+                    <li>Read file contents</li>
+                    <li>Detect zero-day exploits</li>
+                    <li>Track your IP address</li>
+                    <li>Replace your antivirus</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tech Stack -->
+        <h2>Tech Stack</h2>
+        <p>Built with modern, minimal dependencies:</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🐍</div>
+                <h3>Python 3.10+</h3>
+                <p>Robust, readable backend code</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🏃</div>
+                <h3>Flask</h3>
+                <p>Lightweight web framework</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🗄️</div>
+                <h3>SQLite</h3>
+                <p>File-based threat history</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔑</div>
+                <h3>VirusTotal API</h3>
+                <p>Industry-leading file intelligence</p>
+            </div>
+        </div>
+
+        <!-- Why I Built This -->
+        <h2>Why This Project Exists</h2>
+        <p>Most antivirus tools are black boxes. You upload a file, click "scan," and get a verdict without
+            understanding how or why.</p>
+        <p>I wanted to build something transparent. Something that shows you exactly what's happening: your file gets
+            hashed, that hash gets checked against 70+ security vendors, and you get an honest result with reasoning.
+        </p>
+        <p>The code is on GitHub. You can see exactly how it works. No magic. No mystery. Just good security
+            fundamentals.</p>
+
+        <h3>What I Learned</h3>
+        <ul>
+            <li><strong>File Hashing:</strong> How SHA-256 creates deterministic fingerprints</li>
+            <li><strong>APIs:</strong> Working with rate limits and error handling</li>
+            <li><strong>Risk Classification:</strong> How extension-based detection actually works</li>
+            <li><strong>Deployment:</strong> Getting Python apps production-ready</li>
+            <li><strong>UI/UX:</strong> Security tools need clear, simple interfaces</li>
+        </ul>
+
+        <a href="/scanner" class="cta-button">Start Scanning →</a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 File Security Scanner. No files stored. Completely private.</p>
+        <p style="margin-top: 1em; font-size: 13px;">
+            Built with curiosity. Open source. MIT License.
+        </p>
+    </footer>
+</body>
+
+</html>

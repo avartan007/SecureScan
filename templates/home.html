@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Security Scanner - Scan Files Instantly</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: white;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        }
+
+        /* Navigation - Glassmorphic */
+        nav {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 102, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1em 2em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2em;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-links a.active {
+            color: #ff6600;
+            background: transparent;
+            border: 1px solid transparent;
+            border-bottom: 2px solid #ff6600;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: white;
+            padding: 100px 2em;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: #ff6600;
+        }
+
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            max-width: 600px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1em;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .btn-primary {
+            background: #ff6600;
+            color: white;
+            border: 1px solid #ff6600;
+            box-shadow: 0 8px 32px rgba(255, 102, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #ff8c00;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(255, 102, 0, 0.4);
+            border: 1px solid #ff8c00;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ff6600;
+            border: 1px solid #ff6600;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        - Glassmorphic */ .stats {
+            background: transparent;
+            padding: 60px 2em;
+            margin-top: 40px;
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2em;
+            text-align: center;
+        }
+
+        .stat-item {
+            background: rgba(255, 102, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 102, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 102, 0, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(255, 102, 0, 0.3);
+            border: 1px solid rgba(255, 102, 0, 0.4);
+        }
+
+        .stat-item h3 {
+            font-size: 32px;
+            color: #ff6600;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-item p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            text-align: center;
+            padding: 2em;
+            margin-top: 60px;
+            border-top: 1px solid rgba(255, 102, 0, 0.2);
+        }
+
+        footer p {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .nav-links {
+                gap: 1em;
+                font-size: 14px;
+            }
+
+            .hero-buttons {
+                gap: 0.5em;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">🛡️ File Scanner</a>
+            <ul class="nav-links">
+                <li><a href="/" class="active">Home</a></li>
+                <li><a href="/scanner">Scanner</a></li>
+                <li><a href="/features">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>🛡️ Scan Files Instantly</h1>
+        <p>Upload any file and instantly know if it's safe. Powered by 70+ antivirus vendors via VirusTotal.</p>
+        <div class="hero-buttons">
+            <a href="/scanner" class="btn btn-primary">Start Scanning</a>
+            <a href="/features" class="btn btn-secondary">Learn More</a>
+        </div>
+
+        <div class="stats"
+            style="background: transparent; margin-top: 80px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 40px;">
+            <div class="stats-container" style="gap: 4em;">
+                <div class="stat-item">
+                    <h3 style="color: white;">70+</h3>
+                    <p style="color: rgba(255,255,255,0.8);">Antivirus Vendors</p>
+                </div>
+                <div class="stat-item">
+                    <h3 style="color: white;">Instant</h3>
+                    <p style="color: rgba(255,255,255,0.8);">Results in Seconds</p>
+                </div>
+                <div class="stat-item">
+                    <h3 style="color: white;">100%</h3>
+                    <p style="color: rgba(255,255,255,0.8);">Private & Secure</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 File Security Scanner. No files stored. Completely private.</p>
+    </footer>
+</body>
+
+</html>

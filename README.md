@@ -1,103 +1,252 @@
 # 🛡️ File Security Scanner
 
-<div align="center">
+A simple, honest file security scanner. Upload a file → get a verdict: **CLEAN**, **SUSPICIOUS**, **MALICIOUS**, or **UNKNOWN**.
 
-![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
-![Python](https://img.shields.io/badge/python-3.9%2B-blue?style=flat-square)
-![Status](https://img.shields.io/badge/status-production%20ready-success?style=flat-square)
-
-**A lightweight, blazing-fast Python tool to scan files and keep your digital assets safe.**
-
-<p>
-  <a href="#-features">Features</a> •
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-usage">Usage</a> •
-  <a href="#-project-structure">Structure</a> •
-  <a href="#-license">License</a>
-</p>
-
-</div>
+Powered by VirusTotal's collective security intelligence (70+ antivirus vendors) with a smart fallback to extension-based risk assessment.
 
 ---
 
-## ✨ Features
+## What It Does
 
-<table>
-<tr>
-<td>🔍 <b>Smart Scanning</b><br/>Recursive directory scanning with real-time progress</td>
-<td>🧮 <b>Hash Detection</b><br/>SHA-256 hashing + duplicate file identification</td>
-</tr>
-<tr>
-<td>📦 <b>ZIP Support</b><br/>Automatic archive extraction & nested scanning</td>
-<td>📊 <b>Risk Classification</b><br/>Extension-based threat assessment</td>
-</tr>
-<tr>
-<td>🚀 <b>Auto-Organization</b><br/>Sort files by safety level instantly</td>
-<td>📝 <b>Audit Logging</b><br/>Complete chain of custody tracking</td>
-</tr>
-<tr>
-<td>🗄️ <b>Intelligence DB</b><br/>Local threat metadata database</td>
-<td>⚡ <b>Lightweight</b><br/>Minimal dependencies, minimal overhead</td>
-</tr>
-</table>
+1. **You upload a file** (drag & drop or click)
+2. **We hash it** (SHA-256 — creates a unique fingerprint)
+3. **We check VirusTotal** (if API key configured) — "Have 70+ antivirus vendors seen this file before?"
+4. **You get instant feedback** — Color-coded result with reasoning
+
+**No files are stored on the server.** File deleted after scanning. Only the hash gets analyzed.
 
 ---
 
-## 🚀 Quick Start
+## Features
 
-### Installation
+| Feature | Details |
+|---------|---------|
+| **Simple Web UI** | Mobile-friendly, single-page app. No dependencies or heavy frameworks. |
+| **Two-tier scanning** | VirusTotal API (primary) + Extension-based fallback (always available) |
+| **Works without API key** | Uses extension-based classification if you don't have VirusTotal key |
+| **Instant results** | Shows hash, file size, risk reason, detection count (if available) |
+| **File history** | SQLite database tracks all scanned files by hash |
+| **No storage** | Files are deleted immediately — no upload vault |
+| **Production-ready** | Runs on Render free tier, Heroku, or your own server |
+
+---
+
+## Quick Start
+
+### Local Setup (2 minutes)
 
 ```bash
-# Clone the repository
-git clone https://github.com/avartan007/file-security-scanner.git
+# Clone repo
+git clone https://github.com/yourusername/file-security-scanner.git
 cd file-security-scanner
 
-# Install dependencies
+# Create venv & install
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 
-# Copy environment config
+# Configure (optional)
 cp .env.example .env
+# Add your VirusTotal API key (get free one at virustotal.com)
+
+# Run
+python app.py
+# Open http://localhost:5000
 ```
 
-### Configure
+### Deploy to Render (3 clicks)
 
-Edit `.env` with your VirusTotal API key (optional):
-```bash
-VT_API_KEY=your_api_key_here
+1. Push to GitHub
+2. Go to [render.com](https://render.com)
+3. Create Web Service → Connect GitHub repo
+4. Add env var: `VT_API_KEY=your_key` (optional)
+5. Deploy
+
+Done. Live in 2 minutes.
+
+---
+
+## How to Get a Free VirusTotal API Key
+
+1. Visit https://www.virustotal.com/gui/home/upload
+2. Sign up (free account)
+3. Go to Settings → API
+4. Copy your API key
+5. Add it to `.env`: `VT_API_KEY=your_key_here`
+
+Without an API key? The app still works — it just uses file extension analysis instead.
+
+---
+
+## Project Structure
+
 ```
-
-### Run
-
-```bash
-python run.py
-```
-
-You'll see an interactive menu:
-```
-============================================================
-FILE SECURITY SCANNER
-============================================================
-
-  1. Scan files recursively
-  2. Organize files by risk
-  3. View scan results
-  4. Exit
-
-============================================================
+file-security-scanner/
+├── app.py                    # Flask web app
+├── Procfile                  # Deploy instruction for Render/Heroku
+├── render.yaml               # Render-specific config
+├── requirements.txt          # Python dependencies
+├── .env.example              # Template for environment variables
+├── README.md                 # This file
+├── LICENSE
+└── src/
+    ├── __init__.py
+    ├── scanner.py            # File scanning logic
+    ├── database.py           # SQLite threat database
+    └── router.py             # File organization
+└── templates/
+    └── index.html            # Web UI
 ```
 
 ---
 
-## 📖 Usage
+## Tech Stack
 
-### Interactive Mode (Default)
+- **Backend**: Flask (Python)
+- **WSGI Server**: Gunicorn (production)
+- **Database**: SQLite
+- **API**: VirusTotal v3
+- **Frontend**: Vanilla HTML/CSS/JS (no frameworks)
+
+---
+
+## Security & Privacy
+
+### What this app does:
+✅ Hashes files with SHA-256  
+✅ Checks hashes against VirusTotal (70+ AV vendors)  
+✅ Detects suspicious file extensions  
+✅ Maintains local scan history  
+✅ Works completely offline (no API key required)  
+
+### What it doesn't do:
+❌ Store files on server  
+❌ Read file contents  
+❌ Detect zero-day vulnerabilities  
+❌ Replace an antivirus on your computer  
+
+### Privacy:
+- Files are **never stored**
+- Files are **deleted immediately** after scanning
+- Only the **file hash** is sent to VirusTotal (not the file)
+- Your API key stays in `.env` (never committed to git)
+
+---
+
+## Configuration
+
+Edit `.env` (copy from `.env.example`):
 
 ```bash
-python run.py
+# Optional: Your VirusTotal API key (free tier available)
+VT_API_KEY=
+
+# Don't change these (production defaults)
+FLASK_ENV=production
 ```
 
-**Menu Options:**
-1. **Scan files** - Recursively scan `./books/` directory
+If you don't add an API key, the app works fine with extension-based scanning.
+
+---
+
+## API Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/` | GET | Serve the web UI |
+| `/scan` | POST | Upload and scan a file |
+| `/health` | GET | Health check (returns `{"status": "ok"}`) |
+
+### Example `/scan` request:
+
+```bash
+curl -X POST -F "file=@myfile.exe" http://localhost:5000/scan
+```
+
+Response:
+```json
+{
+  "filename": "myfile.exe",
+  "hash": "abc123...",
+  "size_bytes": 524288,
+  "risk_level": "SUSPICIOUS",
+  "reason": "Executable file type",
+  "source": "Extension-based",
+  "status": "SCANNED"
+}
+```
+
+---
+
+## Environment Variables
+
+| Variable | Required | Default | Purpose |
+|----------|----------|---------|---------|
+| `VT_API_KEY` | No | Empty | VirusTotal API key (enables cloud scanning) |
+| `FLASK_ENV` | No | `production` | Flask environment mode |
+| `PORT` | No | `5000` | Port to listen on (auto-set by Render) |
+
+---
+
+## Performance Notes
+
+- **File size limit**: 32 MB
+- **Response time**: <500ms (local scanning), 1-2s (VirusTotal API)
+- **VirusTotal rate limit**: 4 requests/minute (free tier)
+- **Database**: Single SQLite file, suitable for <100k scans
+
+---
+
+## Troubleshooting
+
+**"ModuleNotFoundError: No module named 'flask'"**  
+→ Run `pip install -r requirements.txt`
+
+**"VirusTotal API errors"**  
+→ Check your API key in `.env`  
+→ Verify you're not exceeding 4 requests/minute
+
+**"File upload fails"**  
+→ Check file size (<32 MB)  
+→ Ensure `/tmp` has space for temp files
+
+**App works locally but fails on Render**  
+→ Check Render logs: Settings → Logs  
+→ Verify `VT_API_KEY` env var is set (if using)
+
+---
+
+## Development
+
+Want to improve this? Here's how:
+
+```bash
+# Install dev dependencies (if needed)
+pip install -r requirements.txt
+
+# Make changes
+# Test locally: python app.py
+# Push to GitHub
+# Render auto-redeploys
+```
+
+---
+
+## License
+
+MIT — Use it, modify it, distribute it. No attribution required.
+
+---
+
+## Links
+
+- **VirusTotal API docs**: https://developers.virustotal.com/reference/files-get
+- **Flask docs**: https://flask.palletsprojects.com/
+- **Render deployment**: https://render.com/docs/web-services
+
+---
+
+**Built by someone curious about security. Zero marketing BS, just honest code.**
 2. **Organize** - Sort results into `files/approved` & `files/suspicious`
 3. **Results** - View scan summary and file details
 4. **Exit** - Quit cleanly
