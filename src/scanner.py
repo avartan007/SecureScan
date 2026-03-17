@@ -36,9 +36,9 @@ class FileScanner:
             return None
 
     def _check_virustotal_api(self, file_hash):
-        """Query VirusTotal for file hash. Returns (risk_level, reason)."""
+        """Query VirusTotal for file hash. Returns (risk_level, reason, stats)."""
         if not self.api_key:
-            return None, None
+            return None, None, None
 
         try:
             url = f"{self.vt_base_url}/files/{file_hash}"
@@ -52,29 +52,44 @@ class FileScanner:
                 harmless = stats.get("harmless", 0)
                 malicious = stats.get("malicious", 0)
                 suspicious = stats.get("suspicious", 0)
+                undetected = stats.get("undetected", 0)
+                total = harmless + malicious + suspicious + undetected
 
-                if malicious > 0:
-                    return "MALICIOUS", f"{malicious} detections"
-                if suspicious > 0:
-                    return "SUSPICIOUS", f"{suspicious} suspicious detections"
-                if harmless > 0:
-                    return "CLEAN", "No threats detected"
+                # Threat decision logic
+                if malicious >= 5:
+                    risk = "MALICIOUS"
+                    reason = f"{malicious} vendors flagged as malicious"
+                elif malicious > 0:
+                    risk = "SUSPICIOUS"
+                    reason = f"{malicious} vendor(s) detected threat"
+                elif suspicious > 0:
+                    risk = "SUSPICIOUS"
+                    reason = f"{suspicious} vendor(s) flagged as suspicious"
+                elif harmless > 0:
+                    risk = "CLEAN"
+                    reason = "Verified safe by security vendors"
+                else:
+                    risk = "UNKNOWN"
+                    reason = "No analysis available"
 
-            return None, None
+                stats_data = {"malicious": malicious, "suspicious": suspicious, "harmless": harmless, "total": total}
+                return risk, reason, stats_data
+
+            return None, None, None
 
         except Exception as e:
-            return None, str(e)
+            return None, str(e), None
 
     def check_extension(self, file_path):
-        """Get risk level from file extension."""
+        """Heuristic-based risk classification from file extension."""
         _, ext = os.path.splitext(file_path)
         ext = ext.lower()
 
         if ext in SUSPICIOUS_EXTENSIONS:
-            return "SUSPICIOUS", "Executable file type"
+            return "SUSPICIOUS", f"Executable extension: {ext} (heuristic-based classification)"
         if ext in SAFE_EXTENSIONS:
-            return "CLEAN", "Known safe file type"
-        return "UNKNOWN", "Unknown file type"
+            return "CLEAN", f"Known safe extension: {ext}"
+        return "UNKNOWN", "Unknown extension (inconclusive)"
 
     def analyze_file(self, file_path):
         """Analyze a file and return detailed result."""
@@ -113,7 +128,7 @@ class FileScanner:
             }
 
         # Try VirusTotal first
-        vt_risk, vt_reason = self._check_virustotal_api(file_hash)
+        vt_risk, vt_reason, vt_stats = self._check_virustotal_api(file_hash)
         if vt_risk:
             return {
                 "filename": filename,
@@ -122,10 +137,11 @@ class FileScanner:
                 "status": "SCANNED",
                 "risk_level": vt_risk,
                 "reason": vt_reason,
-                "source": "VirusTotal"
+                "source": "VirusTotal API",
+                "stats": vt_stats
             }
 
-        # Fall back to extension-based check
+        # Fall back to heuristic-based extension classification
         ext_risk, ext_reason = self.check_extension(file_path)
         return {
             "filename": filename,
@@ -134,5 +150,6 @@ class FileScanner:
             "status": "SCANNED",
             "risk_level": ext_risk,
             "reason": ext_reason,
-            "source": "Extension-based"
+            "source": "Heuristic Analysis",
+            "stats": None
         }

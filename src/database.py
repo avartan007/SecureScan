@@ -99,6 +99,27 @@ class ThreatDatabase:
         file_info = self.get_file(file_hash)
         return file_info and file_info.get("risk_level") == "MALICIOUS"
 
+    def get_recent_scans(self, limit=10):
+        """Get recent scan history."""
+        try:
+            cursor = self.conn.execute(
+                """SELECT file_hash, filename, risk_level, scanned_at 
+                   FROM scan_history 
+                   ORDER BY scanned_at DESC LIMIT ?""",
+                (limit,)
+            )
+            scans = []
+            for row in cursor.fetchall():
+                scans.append({
+                    "hash": row[0][:16] + "..." if row[0] else None,
+                    "filename": row[1],
+                    "risk_level": row[2],
+                    "timestamp": row[3]
+                })
+            return scans
+        except Exception as e:
+            return []
+
     def close(self):
         """Close database connection."""
         if self.conn:

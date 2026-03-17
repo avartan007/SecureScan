@@ -166,6 +166,18 @@ def scan():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/history", methods=["GET"])
+def get_history():
+    """Get recent scan history."""
+    try:
+        # Get recent scans from database
+        history = db.get_recent_scans(limit=10)
+        return jsonify({"history": history})
+    except Exception as e:
+        app.logger.error(f"History error: {str(e)}")
+        return jsonify({"history": [], "error": str(e)})
+
+
 @app.route("/health", methods=["GET"])
 def health():
     """Health check endpoint."""
