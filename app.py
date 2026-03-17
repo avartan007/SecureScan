@@ -2,6 +2,7 @@
 """Flask web application for file security scanning."""
 
 import os
+import hashlib
 import tempfile
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
@@ -19,6 +20,18 @@ api_key = os.getenv("VT_API_KEY")
 scanner = FileScanner(api_key=api_key)
 db = ThreatDatabase()
 router = FileRouter()
+
+# File validation constants
+MAX_FILE_SIZE = 32 * 1024 * 1024  # 32 MB
+DANGEROUS_EXTENSIONS = {
+    '.exe', '.scr', '.bat', '.cmd', '.com', '.pif', '.vbs', '.js',
+    '.jar', '.zip', '.rar', '.7z', '.iso', '.img', '.dmg', '.msi',
+    '.dll', '.sys', '.drv', '.ocx', '.cab', '.msp', '.ps1'
+}
+SAFE_EXTENSIONS = {
+    '.pdf', '.txt', '.doc', '.docx', '.xlsx', '.xls', '.pptx', '.ppt',
+    '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.svg', '.mp3', '.mp4'
+}
 
 
 def format_bytes(bytes_val):
@@ -39,6 +52,25 @@ def get_risk_color(risk_level):
         "UNKNOWN": "#95a5a6"
     }
     return colors.get(risk_level, "#95a5a6")
+
+
+def calculate_file_hash(file_path):
+    """Calculate SHA-256 hash of file."""
+    sha256_hash = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
+
+
+def classify_risk_by_extension(extension):
+    """Pre-classify risk based on file extension."""
+    ext = extension.lower()
+    if ext in DANGEROUS_EXTENSIONS:
+        return "SUSPICIOUS"
+    elif ext in SAFE_EXTENSIONS:
+        return "CLEAN"
+    return "UNKNOWN"
 
 
 # Routes
@@ -62,7 +94,7 @@ def features():
 
 @app.route("/scan", methods=["POST"])
 def scan():
-    """Handle file upload and scan."""
+    """Handle file upload and scan with multi-stage pipeline."""
     if "file" not in request.files:
         return jsonify({"error": "No file provided"}), 400
 
@@ -76,26 +108,51 @@ def scan():
             file.save(tmp.name)
             tmp_path = tmp.name
 
-        # Scan the file
-        result = scanner.analyze_file(tmp_path)
+        # STAGE 1: Validate file size
+        try:
+            file_size = os.path.getsize(tmp_path)
+            if file_size > MAX_FILE_SIZE:
+                return jsonify({
+                    "error": f"File exceeds 32 MB limit ({format_bytes(file_size)})"
+                }), 400
+        except Exception as e:
+            return jsonify({"error": f"File size validation failed: {str(e)}"}), 400
 
+        # STAGE 2: Compute hash and validate type
+        try:
+            file_hash = calculate_file_hash(tmp_path)
+            _, file_ext = os.path.splitext(file.filename)
+            extension_risk = classify_risk_by_extension(file_ext)
+        except Exception as e:
+            return jsonify({"error": f"File processing failed: {str(e)}"}), 400
+
+        # STAGE 3 & 4: Scan the file
+        result = scanner.analyze_file(tmp_path)
+        
+        # Ensure hash is populated
+        result["hash"] = file_hash
+        result["filename"] = file.filename
+        result["size_bytes"] = file_size
+        
         # Add size formatting
-        if result.get("size_bytes"):
-            result["size_formatted"] = format_bytes(result["size_bytes"])
+        result["size_formatted"] = format_bytes(file_size)
 
         # Add color for frontend
         result["color"] = get_risk_color(result["risk_level"])
 
-        # Store in database
-        if result.get("hash"):
+        # LOGGING STAGE: Store in database for audit trail
+        try:
             db.add_file(
-                result["hash"],
-                result["filename"],
-                result.get("size_bytes", 0),
+                file_hash,
+                file.filename,
+                file_size,
                 result["risk_level"],
-                result.get("source", "Web Upload")
+                result.get("source", "Web Upload"),
+                result.get("reason", "No specific threat detected")
             )
-
+        except Exception as log_err:
+            app.logger.warning(f"Database logging failed: {str(log_err)}")
+        
         # Clean up temp file
         try:
             os.remove(tmp_path)
@@ -105,6 +162,7 @@ def scan():
         return jsonify(result)
 
     except Exception as e:
+        app.logger.error(f"Scan error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 

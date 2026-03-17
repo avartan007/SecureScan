@@ -24,29 +24,55 @@ class ThreatDatabase:
                     file_size INTEGER,
                     risk_level TEXT,
                     scan_source TEXT,
+                    reason TEXT,
                     first_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
+            
+            # Create scan history table for audit trail
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS scan_history (
+                    id INTEGER PRIMARY KEY,
+                    file_hash TEXT,
+                    filename TEXT,
+                    file_size INTEGER,
+                    risk_level TEXT,
+                    scan_source TEXT,
+                    scanned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
 
-    def add_file(self, file_hash, filename, file_size, risk_level, source):
+    def add_file(self, file_hash, filename, file_size, risk_level, source, reason=None):
         """Record a scanned file."""
         try:
             with self.conn:
                 self.conn.execute(
                     """INSERT INTO files 
-                       (file_hash, filename, file_size, risk_level, scan_source)
-                       VALUES (?, ?, ?, ?, ?)""",
-                    (file_hash, filename, file_size, risk_level, source)
+                       (file_hash, filename, file_size, risk_level, scan_source, reason)
+                       VALUES (?, ?, ?, ?, ?, ?)""",
+                    (file_hash, filename, file_size, risk_level, source, reason)
                 )
         except sqlite3.IntegrityError:
             # File already exists, update last_updated
             with self.conn:
                 self.conn.execute(
-                    """UPDATE files SET last_updated = ? 
+                    """UPDATE files SET last_updated = ?, scan_source = ?, reason = ? 
                        WHERE file_hash = ?""",
-                    (datetime.now().isoformat(), file_hash)
+                    (datetime.now().isoformat(), source, reason, file_hash)
                 )
+        
+        # Always add to history for audit trail
+        try:
+            with self.conn:
+                self.conn.execute(
+                    """INSERT INTO scan_history
+                       (file_hash, filename, file_size, risk_level, scan_source)
+                       VALUES (?, ?, ?, ?, ?)""",
+                    (file_hash, filename, file_size, risk_level, source)
+                )
+        except:
+            pass
 
     def get_file(self, file_hash):
         """Look up a file by hash."""
