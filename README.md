@@ -21,17 +21,6 @@
 
 ---
 
-## 🖼️ Preview
-
-> Add screenshots or a GIF here.
-
-```
-assets/home.png
-assets/result.png
-```
-
----
-
 ## 🏗️ Tech Stack
 
 | Category | Technologies |
